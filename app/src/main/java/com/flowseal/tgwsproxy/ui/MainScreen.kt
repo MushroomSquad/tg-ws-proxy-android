@@ -171,6 +171,15 @@ fun MainScreen(
                 OutlinedButton(onClick = onBatteryHint) {
                     Text("Battery", maxLines = 1)
                 }
+                OutlinedButton(onClick = onRefreshComponents) {
+                    Text("Refresh CF", maxLines = 1)
+                }
+            }
+
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 OutlinedButton(onClick = onClearLogs) {
                     Text("Clear logs", maxLines = 1)
                 }
@@ -180,13 +189,22 @@ fun MainScreen(
                 OutlinedButton(onClick = onShareLogs) {
                     Text("Share logs", maxLines = 1)
                 }
-                OutlinedButton(onClick = onRefreshComponents) {
-                    Text("Refresh CF", maxLines = 1)
-                }
             }
 
-            state.componentStatus?.let {
-                Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.secondary)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = state.componentStatus ?: "CF domains: tap Refresh CF",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = onRefreshComponents) {
+                    Text("Refresh CF")
+                }
             }
 
             if (showSettings) {
