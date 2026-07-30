@@ -1,8 +1,15 @@
-# TgWsProxy Android
+# TgWsProxy Android — Telegram MTProto WebSocket Proxy (no root)
+
+[![Release](https://img.shields.io/github/v/release/MushroomSquad/tg-ws-proxy-android?include_prereleases)](https://github.com/MushroomSquad/tg-ws-proxy-android/releases/latest)
+[![APK](https://img.shields.io/badge/download-APK-blue)](https://github.com/MushroomSquad/tg-ws-proxy-android/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Obtainium](https://img.shields.io/badge/updates-Obtainium-green)](https://github.com/ImranR98/Obtainium)
+
+**Keywords:** Telegram Android proxy · MTProto · WebSocket · local proxy · no root · no VPN · Obtainium APK · Kotlin Compose
 
 Local **MTProto ↔ WebSocket** proxy for **Telegram Android** — no root, no VPN.
 
-Telegram talks to `127.0.0.1` on your phone; this app bridges to Telegram DCs over WSS/TCP (same idea as the desktop tool).
+Telegram talks to `127.0.0.1` on your phone; this app bridges to Telegram DCs over WSS/TCP (same idea as the desktop [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)).
 
 ```text
 Telegram Android → 127.0.0.1:1443 → TgWsProxy → WSS/TCP → Telegram DC
@@ -10,7 +17,7 @@ Telegram Android → 127.0.0.1:1443 → TgWsProxy → WSS/TCP → Telegram DC
 
 **Русская версия:** [README.ru.md](README.ru.md)
 
-> Package id: `com.flowseal.tgwsproxy` (legacy). Project home: [MushroomSquad](https://github.com/MushroomSquad/tg-ws-proxy-android).
+> Package id: `com.flowseal.tgwsproxy` (legacy). Project home: [MushroomSquad/tg-ws-proxy-android](https://github.com/MushroomSquad/tg-ws-proxy-android).
 
 ## Important
 
@@ -80,6 +87,10 @@ export ANDROID_HOME=/path/to/Android/Sdk
 ```
 
 CI builds signed APKs on version tags (`v*`) via GitHub Actions.
+
+## Related searches
+
+telegram proxy android · mtproto websocket · tg ws proxy · local mtproto proxy · obtainium telegram · android no root proxy
 
 ## License
 
