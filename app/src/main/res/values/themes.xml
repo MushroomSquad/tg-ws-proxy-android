@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.TgWsProxy" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">#FF0F172A</item>
-        <item name="android:navigationBarColor">#FF0F172A</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowBackground">#FF0F172A</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 </resources>
