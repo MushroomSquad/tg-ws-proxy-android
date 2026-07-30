@@ -1,0 +1,4 @@
+# Keep keystore out of git. Generate:
+# keytool -genkeypair -v -keystore tgwsproxy.jks -keyalg RSA -keysize 2048 -validity 10000 -alias tgwsproxy
+*
+!.gitignore

@@ -1,0 +1,29 @@
+# Built artifacts
+.gradle/
+build/
+**/build/
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Keystore / secrets
+keystore/*.jks
+keystore/*.keystore
+*.jks
+*.keystore
+secrets.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kotlin
+.kotlin/

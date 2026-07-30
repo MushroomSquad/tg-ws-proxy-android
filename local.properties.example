@@ -1,0 +1,2 @@
+# Local SDK path example (do not commit real local.properties)
+sdk.dir=/path/to/Android/Sdk

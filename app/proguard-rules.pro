@@ -1,0 +1,3 @@
+-keepnames class com.flowseal.tgwsproxy.proxy.** { *; }
+-keepclassmembers class com.flowseal.tgwsproxy.proxy.** { *; }
+-dontwarn javax.annotation.**
