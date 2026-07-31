@@ -33,6 +33,9 @@ data class UiState(
     val firstRun: Boolean = true,
     val updateInfo: UpdateInfo? = null,
     val componentStatus: String? = null,
+    val includeProxy: Boolean = true,
+    val includeVpn: Boolean = true,
+    val connecting: Boolean = false,
 )
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
@@ -41,25 +44,42 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val refresh = MutableStateFlow(0)
     private val updateInfo = MutableStateFlow<UpdateInfo?>(null)
     private val componentStatus = MutableStateFlow<String?>(null)
+    private val connecting = MutableStateFlow(false)
 
     private data class Extra(val refresh: Int, val update: UpdateInfo?, val component: String?)
     private data class ServiceFlags(val proxy: Boolean, val vpn: Boolean)
+    private data class IncludeFlags(val proxy: Boolean, val vpn: Boolean)
+    private data class Meta(
+        val firstDone: Boolean,
+        val extra: Extra,
+        val include: IncludeFlags,
+        val connecting: Boolean,
+    )
 
     val state: StateFlow<UiState> = combine(
         repo.configFlow,
         combine(ProxyForegroundService.running, byeDpiRunning) { p, v -> ServiceFlags(p, v) },
         AppLog.tail,
-        repo.firstRunDoneFlow,
-        combine(refresh, updateInfo, componentStatus) { r, u, c -> Extra(r, u, c) },
-    ) { config, services, logs, firstDone, extra ->
+        combine(
+            repo.firstRunDoneFlow,
+            combine(refresh, updateInfo, componentStatus) { r, u, c -> Extra(r, u, c) },
+            combine(repo.includeProxyFlow, repo.includeVpnFlow) { p, v -> IncludeFlags(p, v) },
+            connecting,
+        ) { firstDone, extra, include, isConnecting ->
+            Meta(firstDone, extra, include, isConnecting)
+        },
+    ) { config, services, logs, meta ->
         UiState(
             config = if (config.secret.isEmpty()) config.copy(secret = "…") else config,
             proxyRunning = services.proxy || ProxyForegroundService.isRunning(),
             vpnRunning = services.vpn,
             logTail = logs,
-            firstRun = !firstDone,
-            updateInfo = extra.update,
-            componentStatus = extra.component,
+            firstRun = !meta.firstDone,
+            updateInfo = meta.extra.update,
+            componentStatus = meta.extra.component,
+            includeProxy = meta.include.proxy,
+            includeVpn = meta.include.vpn,
+            connecting = meta.connecting,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UiState())
 
@@ -81,6 +101,22 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun refresh() {
         refresh.value++
+    }
+
+    fun setConnecting(value: Boolean) {
+        connecting.value = value
+    }
+
+    fun setIncludeProxy(value: Boolean) {
+        viewModelScope.launch {
+            repo.setIncludeProxy(value)
+        }
+    }
+
+    fun setIncludeVpn(value: Boolean) {
+        viewModelScope.launch {
+            repo.setIncludeVpn(value)
+        }
     }
 
     fun refreshComponentsNow() {
@@ -146,6 +182,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun dismissFirstRun() {
         viewModelScope.launch {
             repo.setFirstRunDone()
+            refresh.value++
+        }
+    }
+
+    fun resetFirstRunTip() {
+        viewModelScope.launch {
+            // Re-show by clearing first_run_done — store false
+            repo.setFirstRunDoneFalse()
             refresh.value++
         }
     }

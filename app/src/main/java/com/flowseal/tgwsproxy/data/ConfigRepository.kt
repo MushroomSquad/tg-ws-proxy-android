@@ -28,6 +28,8 @@ class ConfigRepository(private val context: Context) {
         val firstRunDone = booleanPreferencesKey("first_run_done")
         val poolSize = intPreferencesKey("pool_size")
         val checkUpdates = booleanPreferencesKey("check_updates")
+        val includeProxyConnect = booleanPreferencesKey("include_proxy_connect")
+        val includeVpnConnect = booleanPreferencesKey("include_vpn_connect")
     }
 
     val configFlow: Flow<ProxyConfig> = context.dataStore.data.map { prefs ->
@@ -36,6 +38,14 @@ class ConfigRepository(private val context: Context) {
 
     val firstRunDoneFlow: Flow<Boolean> = context.dataStore.data.map {
         it[Keys.firstRunDone] ?: false
+    }
+
+    val includeProxyFlow: Flow<Boolean> = context.dataStore.data.map {
+        it[Keys.includeProxyConnect] ?: true
+    }
+
+    val includeVpnFlow: Flow<Boolean> = context.dataStore.data.map {
+        it[Keys.includeVpnConnect] ?: true
     }
 
     suspend fun getConfig(): ProxyConfig = configFlow.first()
@@ -80,6 +90,18 @@ class ConfigRepository(private val context: Context) {
 
     suspend fun setFirstRunDone() {
         context.dataStore.edit { it[Keys.firstRunDone] = true }
+    }
+
+    suspend fun setFirstRunDoneFalse() {
+        context.dataStore.edit { it[Keys.firstRunDone] = false }
+    }
+
+    suspend fun setIncludeProxy(value: Boolean) {
+        context.dataStore.edit { it[Keys.includeProxyConnect] = value }
+    }
+
+    suspend fun setIncludeVpn(value: Boolean) {
+        context.dataStore.edit { it[Keys.includeVpnConnect] = value }
     }
 
     private fun Preferences.toConfig(): ProxyConfig {

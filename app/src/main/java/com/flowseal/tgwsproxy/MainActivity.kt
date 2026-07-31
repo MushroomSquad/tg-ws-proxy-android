@@ -15,7 +15,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,8 +25,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.flowseal.tgwsproxy.byedpi.services.ServiceManager
 import com.flowseal.tgwsproxy.byedpi.ui.ByeDpiSettingsActivity
 import com.flowseal.tgwsproxy.service.ProxyForegroundService
+import com.flowseal.tgwsproxy.ui.AmneziaColors
 import com.flowseal.tgwsproxy.ui.AppViewModel
+import com.flowseal.tgwsproxy.ui.ConnectPlanner
+import com.flowseal.tgwsproxy.ui.ConnectSnapshot
 import com.flowseal.tgwsproxy.ui.MainScreen
+import com.flowseal.tgwsproxy.ui.ServiceKind
 import com.flowseal.tgwsproxy.ui.TgWsTheme
 import com.flowseal.tgwsproxy.util.AppLog
 import java.io.File
@@ -38,6 +41,7 @@ class MainActivity : ComponentActivity() {
     ) { /* no-op */ }
 
     private var pendingLogSave: File? = null
+    private var pendingConnectVm: AppViewModel? = null
 
     private val saveLogLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/plain"),
@@ -58,10 +62,16 @@ class MainActivity : ComponentActivity() {
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
+        val vm = pendingConnectVm
+        pendingConnectVm = null
         if (result.resultCode == Activity.RESULT_OK) {
             ServiceManager.startVpn(this)
+            vm?.setConnecting(false)
+            vm?.refresh()
         } else {
             Toast.makeText(this, getString(R.string.vpn_permission_denied), Toast.LENGTH_SHORT).show()
+            vm?.setConnecting(false)
+            vm?.refresh()
         }
     }
 
@@ -71,24 +81,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TgWsTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Surface(modifier = Modifier.fillMaxSize(), color = AmneziaColors.Bg) {
                     val vm: AppViewModel = viewModel(factory = AppViewModel.factory(application))
                     val state by vm.state.collectAsState()
                     MainScreen(
                         state = state,
-                        onStartProxy = {
-                            ProxyForegroundService.start(this)
-                            vm.refresh()
-                        },
-                        onStopProxy = {
-                            ProxyForegroundService.stop(this)
-                            vm.refresh()
-                        },
-                        onStartVpn = { requestVpnAndStart(vm) },
-                        onStopVpn = {
-                            ServiceManager.stopVpn(this)
-                            vm.refresh()
-                        },
+                        onConnect = { performConnect(vm) },
+                        onDisconnect = { performDisconnect(vm) },
+                        onIncludeProxy = { vm.setIncludeProxy(it) },
+                        onIncludeVpn = { vm.setIncludeVpn(it) },
                         onOpenByeDpiSettings = {
                             startActivity(Intent(this, ByeDpiSettingsActivity::class.java))
                         },
@@ -116,6 +117,7 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onDismissFirstRun = { vm.dismissFirstRun() },
+                        onShowFirstRun = { vm.resetFirstRunTip() },
                         onBatteryHint = { openBatterySettings() },
                         onDismissUpdate = { vm.dismissUpdate() },
                         onOpenUpdate = { url ->
@@ -135,12 +137,47 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun performConnect(vm: AppViewModel) {
+        val s = vm.state.value
+        val snap = ConnectSnapshot(
+            includeProxy = s.includeProxy,
+            includeVpn = s.includeVpn,
+            proxyRunning = s.proxyRunning,
+            vpnRunning = s.vpnRunning,
+        )
+        val toStart = ConnectPlanner.servicesToStart(snap)
+        if (toStart.isEmpty()) return
+        vm.setConnecting(true)
+        if (ServiceKind.Proxy in toStart) {
+            ProxyForegroundService.start(this)
+        }
+        if (ServiceKind.Vpn in toStart) {
+            requestVpnAndStart(vm)
+        } else {
+            vm.setConnecting(false)
+            vm.refresh()
+        }
+    }
+
+    private fun performDisconnect(vm: AppViewModel) {
+        val s = vm.state.value
+        val stop = ConnectPlanner.servicesToStop(
+            ConnectSnapshot(s.includeProxy, s.includeVpn, s.proxyRunning, s.vpnRunning),
+        )
+        if (ServiceKind.Proxy in stop) ProxyForegroundService.stop(this)
+        if (ServiceKind.Vpn in stop) ServiceManager.stopVpn(this)
+        vm.setConnecting(false)
+        vm.refresh()
+    }
+
     private fun requestVpnAndStart(vm: AppViewModel) {
         val prepare = VpnService.prepare(this)
         if (prepare != null) {
+            pendingConnectVm = vm
             vpnPermissionLauncher.launch(prepare)
         } else {
             ServiceManager.startVpn(this)
+            vm.setConnecting(false)
             vm.refresh()
         }
     }

@@ -1,7 +1,7 @@
 # Amnezia-style UI for TgWsProxy Android
 
 Date: 2026-07-31  
-Status: draft for user review  
+Status: approved / implemented (v1.2.0)  
 Repo: [MushroomSquad/tg-ws-proxy-android](https://github.com/MushroomSquad/tg-ws-proxy-android)  
 Visual reference: [amnezia-vpn/amnezia-client](https://github.com/amnezia-vpn/amnezia-client) (Qt/QML tokens & Home layout — adapted to Jetpack Compose)
 

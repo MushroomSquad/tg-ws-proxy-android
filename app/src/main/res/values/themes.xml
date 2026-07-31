@@ -7,14 +7,14 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
-    <style name="Theme.TgWsProxy.Settings" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.TgWsProxy.Settings" parent="Theme.Material3.Dark.NoActionBar">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowBackground">#FF0E0E11</item>
-        <item name="colorPrimary">#FF38BDF8</item>
-        <item name="colorOnPrimary">#FF0F172A</item>
-        <item name="android:textColorPrimary">#FFE2E8F0</item>
-        <item name="android:textColorSecondary">#FF94A3B8</item>
+        <item name="colorPrimary">#FFFBB26A</item>
+        <item name="colorOnPrimary">#FF0E0E11</item>
+        <item name="android:textColorPrimary">#FFD7D8DB</item>
+        <item name="android:textColorSecondary">#FF878B91</item>
     </style>
 </resources>
