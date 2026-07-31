@@ -12,23 +12,41 @@ android {
         applicationId = "com.flowseal.tgwsproxy"
         minSdk = 26
         targetSdk = 35
-        versionCode = 14
-        versionName = "1.0.13"
+        versionCode = 15
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
+        }
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DANDROID_STL=none")
+            }
         }
     }
 
     signingConfigs {
         create("release") {
-            val storePath = System.getenv("KEYSTORE_FILE")
-                ?: rootProject.file("keystore/tgwsproxy.jks").takeIf { it.exists() }?.absolutePath
-            if (storePath != null) {
-                storeFile = file(storePath)
-                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "tgwsproxy"
-                keyAlias = System.getenv("KEY_ALIAS") ?: "tgwsproxy"
-                keyPassword = System.getenv("KEY_PASSWORD") ?: "tgwsproxy"
+            // Prefer MushroomSquad CI env (KEYSTORE_*), fall back to ANDROID_* / local keystore/
+            val envStore = sequenceOf(
+                System.getenv("KEYSTORE_FILE"),
+                System.getenv("ANDROID_KEYSTORE_PATH"),
+            ).firstOrNull { !it.isNullOrBlank() }
+            val store = when {
+                !envStore.isNullOrBlank() -> file(envStore)
+                else -> rootProject.file("keystore/tgwsproxy.jks")
+            }
+            if (store.exists()) {
+                storeFile = store
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                    ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                    ?: "tgwsproxy"
+                keyAlias = System.getenv("KEY_ALIAS")
+                    ?: System.getenv("ANDROID_KEY_ALIAS")
+                    ?: "tgwsproxy"
+                keyPassword = System.getenv("KEY_PASSWORD")
+                    ?: System.getenv("ANDROID_KEY_PASSWORD")
+                    ?: "tgwsproxy"
             }
         }
     }
@@ -37,7 +55,10 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            val releaseSigning = signingConfigs.getByName("release")
+            if (releaseSigning.storeFile?.exists() == true) {
+                signingConfig = releaseSigning
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -58,10 +79,20 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 }
@@ -73,9 +104,15 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
+    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("com.takisoft.preferencex:preferencex:1.1.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-service:2.8.7")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
@@ -89,4 +126,25 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+}
+
+tasks.register<Exec>("runNdkBuild") {
+    group = "build"
+    val ndkDir = android.ndkDirectory
+    executable = if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) {
+        "$ndkDir\\ndk-build.cmd"
+    } else {
+        "$ndkDir/ndk-build"
+    }
+    args(
+        "NDK_PROJECT_PATH=${layout.buildDirectory.get().asFile}/intermediates/ndkBuild",
+        "NDK_LIBS_OUT=src/main/jniLibs",
+        "APP_BUILD_SCRIPT=src/main/jni/Android.mk",
+        "NDK_APPLICATION_MK=src/main/jni/Application.mk",
+    )
+    workingDir = project.projectDir
+}
+
+tasks.named("preBuild") {
+    dependsOn("runNdkBuild")
 }

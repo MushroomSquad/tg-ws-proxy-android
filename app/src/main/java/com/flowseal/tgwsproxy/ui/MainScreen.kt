@@ -23,6 +23,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -51,8 +52,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     state: UiState,
-    onStart: () -> Unit,
-    onStop: () -> Unit,
+    onStartProxy: () -> Unit,
+    onStopProxy: () -> Unit,
+    onStartVpn: () -> Unit,
+    onStopVpn: () -> Unit,
+    onOpenByeDpiSettings: () -> Unit,
     onCopyLink: () -> Unit,
     onOpenTelegram: () -> Unit,
     onSaveSettings: (ProxyConfig) -> Unit,
@@ -66,6 +70,7 @@ fun MainScreen(
     onRefreshComponents: () -> Unit = {},
 ) {
     var showSettings by remember { mutableStateOf(false) }
+    var showLogs by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
 
@@ -75,11 +80,15 @@ fun MainScreen(
             title = { Text("How to connect") },
             text = {
                 Text(
-                    "1. Tap Start\n" +
+                    "ByeDPI VPN (optional):\n" +
+                        "1. Tap Start VPN and allow the VPN permission\n" +
+                        "2. System traffic goes through local DPI bypass\n\n" +
+                        "Telegram proxy:\n" +
+                        "1. Tap Start proxy\n" +
                         "2. Tap Open in Telegram (or Copy link)\n" +
                         "3. In Telegram: Settings → Data and Storage → Proxy → enable\n" +
                         "Server: 127.0.0.1  Port: ${state.config.port}\n\n" +
-                        "Keep this app running in the background. On some phones, disable battery restrictions.",
+                        "Both can run together. Keep this app in the background.",
                 )
             },
             confirmButton = {
@@ -123,10 +132,34 @@ fun MainScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
+
+            Text("ByeDPI VPN", fontWeight = FontWeight.SemiBold)
             Text(
-                text = if (state.running) "Running on ${state.config.host}:${state.config.port}"
+                text = if (state.vpnRunning) "VPN connected" else "VPN stopped",
+                color = if (state.vpnRunning) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.secondary,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (state.vpnRunning) {
+                    Button(onClick = onStopVpn) { Text("Stop VPN", maxLines = 1) }
+                } else {
+                    Button(onClick = onStartVpn) { Text("Start VPN", maxLines = 1) }
+                }
+                OutlinedButton(onClick = onOpenByeDpiSettings) {
+                    Text("ByeDPI settings", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+
+            HorizontalDivider()
+
+            Text("Telegram proxy", fontWeight = FontWeight.SemiBold)
+            Text(
+                text = if (state.proxyRunning) "Running on ${state.config.host}:${state.config.port}"
                 else "Stopped",
-                color = if (state.running) MaterialTheme.colorScheme.primary
+                color = if (state.proxyRunning) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.secondary,
             )
 
@@ -134,10 +167,10 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (state.running) {
-                    Button(onClick = onStop) { Text("Stop", maxLines = 1) }
+                if (state.proxyRunning) {
+                    Button(onClick = onStopProxy) { Text("Stop proxy", maxLines = 1) }
                 } else {
-                    Button(onClick = onStart) { Text("Start", maxLines = 1) }
+                    Button(onClick = onStartProxy) { Text("Start proxy", maxLines = 1) }
                 }
                 FilledTonalButton(onClick = onCopyLink, enabled = state.config.secret.length == 32) {
                     Text("Copy link", maxLines = 1)
@@ -163,7 +196,7 @@ fun MainScreen(
             ) {
                 OutlinedButton(onClick = { showSettings = !showSettings }) {
                     Text(
-                        if (showSettings) "Hide settings" else "Settings",
+                        if (showSettings) "Hide proxy settings" else "Proxy settings",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -171,24 +204,38 @@ fun MainScreen(
                 OutlinedButton(onClick = onBatteryHint) {
                     Text("Battery", maxLines = 1)
                 }
-                OutlinedButton(onClick = onRefreshComponents) {
-                    Text("Refresh CF", maxLines = 1)
-                }
             }
 
-            FlowRow(
+            Text("Cloudflare fallback", fontWeight = FontWeight.SemiBold)
+            Text(
+                text = "If a Telegram DC is blocked, the proxy can tunnel via Cloudflare domains. " +
+                    "The domain list is downloaded from the project GitHub " +
+                    "(.github/cfproxy-domains.txt) and cached on the phone. " +
+                    "Update only when media/proxy fails or the list is stale.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                OutlinedButton(onClick = onClearLogs) {
-                    Text("Clear logs", maxLines = 1)
+                OutlinedButton(onClick = onRefreshComponents) {
+                    Text("Update domain list", maxLines = 1)
                 }
-                OutlinedButton(onClick = onExportLogs) {
-                    Text("Save logs", maxLines = 1)
-                }
-                OutlinedButton(onClick = onShareLogs) {
-                    Text("Share logs", maxLines = 1)
-                }
+            }
+            Text(
+                text = state.componentStatus ?: "Using built-in or cached domain list",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+
+            if (showSettings) {
+                SettingsForm(
+                    initial = state.config,
+                    enabled = !state.proxyRunning,
+                    onSave = onSaveSettings,
+                )
             }
 
             Row(
@@ -196,32 +243,31 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = state.componentStatus ?: "CF domains: tap Refresh CF",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(onClick = onRefreshComponents) {
-                    Text("Refresh CF")
+                Text("Logs", fontWeight = FontWeight.SemiBold)
+                Switch(checked = showLogs, onCheckedChange = { showLogs = it })
+            }
+            if (showLogs) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedButton(onClick = onClearLogs) {
+                        Text("Clear", maxLines = 1)
+                    }
+                    OutlinedButton(onClick = onExportLogs) {
+                        Text("Save", maxLines = 1)
+                    }
+                    OutlinedButton(onClick = onShareLogs) {
+                        Text("Share", maxLines = 1)
+                    }
                 }
-            }
-
-            if (showSettings) {
-                SettingsForm(
-                    initial = state.config,
-                    enabled = !state.running,
-                    onSave = onSaveSettings,
+                Text(
+                    text = state.logTail.ifBlank { "No logs yet" },
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
-
-            Text("Logs", fontWeight = FontWeight.SemiBold)
-            Text(
-                text = state.logTail.ifBlank { "No logs yet" },
-                fontFamily = FontFamily.Monospace,
-                fontSize = 11.sp,
-                modifier = Modifier.fillMaxWidth(),
-            )
             Spacer(modifier = Modifier.height(72.dp))
         }
 
@@ -297,17 +343,23 @@ private fun SettingsForm(
             fontSize = 11.sp,
             color = MaterialTheme.colorScheme.secondary,
         )
+        Text(
+            text = "Cloudflare: used only when direct DC connect fails. Leave empty to use the " +
+                "shared GitHub list (Update domain list on the main screen).",
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.secondary,
+        )
         OutlinedTextField(
             value = workers,
             onValueChange = { workers = it },
-            label = { Text("CF worker domains (space-separated)") },
+            label = { Text("Own CF Worker domains (optional)") },
             enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = userDomains,
             onValueChange = { userDomains = it },
-            label = { Text("CF proxy user domains") },
+            label = { Text("Own CF proxy domains (optional)") },
             enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -320,11 +372,11 @@ private fun SettingsForm(
             modifier = Modifier.fillMaxWidth(),
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("CF proxy fallback", modifier = Modifier.weight(1f))
+            Text("Use Cloudflare fallback", modifier = Modifier.weight(1f))
             Switch(checked = cf, onCheckedChange = { cf = it }, enabled = enabled)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Verbose logs", modifier = Modifier.weight(1f))
+            Text("Detailed proxy logs", modifier = Modifier.weight(1f))
             Switch(checked = verbose, onCheckedChange = { verbose = it }, enabled = enabled)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {

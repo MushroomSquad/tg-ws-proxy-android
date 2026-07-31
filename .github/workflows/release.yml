@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to build (e.g. v1.0.11); leave empty to use github.ref_name"
+        description: "Tag to build (e.g. v1.1.0); leave empty to use github.ref_name"
         required: false
         default: ""
 
@@ -29,6 +29,11 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager --install "ndk;26.1.10909125" "cmake;3.22.1"
+          sdkmanager --list_installed | grep -E 'ndk|cmake' || true
 
       - name: Decode keystore
         env:
@@ -77,12 +82,12 @@ jobs:
           body: |
             ## TgWsProxy Android ${{ steps.ver.outputs.version }}
 
-            Local MTProto WebSocket proxy for Telegram Android (no root / no VPN).
+            Local MTProto WebSocket proxy for Telegram Android, with optional ByeDPI VPN.
 
             - **Obtainium**: add GitHub repo `MushroomSquad/tg-ws-proxy-android`, APK filter `\.apk$`
             - Docs: [README](https://github.com/MushroomSquad/tg-ws-proxy-android#readme) · [RU](https://github.com/MushroomSquad/tg-ws-proxy-android/blob/main/README.ru.md)
-            - [Disclaimer](https://github.com/MushroomSquad/tg-ws-proxy-android/blob/main/DISCLAIMER.md) · [Credits](https://github.com/MushroomSquad/tg-ws-proxy-android/blob/main/CREDITS.md) · [Vibe-coded notice](https://github.com/MushroomSquad/tg-ws-proxy-android/blob/main/NOTICE.md)
+            - [Disclaimer](https://github.com/MushroomSquad/tg-ws-proxy-android/blob/main/DISCLAIMER.md) · [Credits](https://github.com/MushroomSquad/tg-ws-proxy-android/blob/main/CREDITS.md) · [Notice](https://github.com/MushroomSquad/tg-ws-proxy-android/blob/main/NOTICE.md)
 
-            Upstream idea: [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) (MIT).
+            Upstream idea: [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy) (MIT). ByeDPI: [ByeDPIAndroid](https://github.com/dovecoteescapee/ByeDPIAndroid) (GPL-3.0).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

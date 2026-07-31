@@ -31,6 +31,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".byedpi.ui.ByeDpiSettingsActivity"
+            android:exported="false"
+            android:label="@string/title_settings"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.TgWsProxy.Settings" />
+
         <service
             android:name=".service.ProxyForegroundService"
             android:exported="false"
@@ -38,6 +45,22 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Local MTProto WebSocket bridge proxy for Telegram" />
+        </service>
+
+        <service
+            android:name=".byedpi.services.ByeDpiVpnService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON"
+                android:value="false" />
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Local DPI bypass VPN via ByeDPI SOCKS" />
         </service>
 
         <provider

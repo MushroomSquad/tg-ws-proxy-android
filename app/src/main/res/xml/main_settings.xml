@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:tag="main_settings">
+
+    <androidx.preference.PreferenceCategory android:title="@string/general_category">
+        <com.takisoft.preferencex.EditTextPreference
+            android:key="dns_ip"
+            android:title="@string/dbs_ip_setting"
+            android:defaultValue="1.1.1.1"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            android:key="ipv6_enable"
+            android:title="@string/ipv6_setting"
+            android:defaultValue="false" />
+    </androidx.preference.PreferenceCategory>
+
+    <androidx.preference.PreferenceCategory android:title="@string/byedpi_category">
+        <SwitchPreference
+            android:key="byedpi_enable_cmd_settings"
+            android:title="@string/use_command_line_settings"
+            android:defaultValue="false" />
+        <Preference
+            android:key="byedpi_ui_settings"
+            android:title="@string/ui_editor"
+            app:fragment="com.flowseal.tgwsproxy.byedpi.fragments.ByeDpiUISettingsFragment" />
+        <Preference
+            android:key="byedpi_cmd_settings"
+            android:title="@string/command_line_editor"
+            app:fragment="com.flowseal.tgwsproxy.byedpi.fragments.ByeDpiCommandLineSettingsFragment" />
+    </androidx.preference.PreferenceCategory>
+
+    <androidx.preference.PreferenceCategory android:title="@string/about_category">
+        <Preference
+            android:key="version"
+            android:title="@string/version"
+            android:summary="…"
+            app:enableCopying="true" />
+    </androidx.preference.PreferenceCategory>
+</PreferenceScreen>

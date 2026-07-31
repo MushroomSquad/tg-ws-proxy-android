@@ -22,7 +22,7 @@ data class UpdateInfo(
  * actually contains an .apk asset — never just opens the upstream desktop page.
  */
 object UpdateChecker {
-    private const val REPO = "MushroomSquad/tg-ws-proxy-android"
+    private const val REPO = "Flowseal/tg-ws-proxy"
     private const val API = "https://api.github.com/repos/$REPO/releases/latest"
     const val RELEASES_PAGE = "https://github.com/$REPO/releases/latest"
     private const val MIN_INTERVAL_MS = 3_600_000L

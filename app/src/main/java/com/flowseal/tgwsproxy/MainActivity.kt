@@ -1,9 +1,11 @@
 package com.flowseal.tgwsproxy
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
@@ -11,7 +13,6 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -21,8 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.flowseal.tgwsproxy.byedpi.services.ServiceManager
+import com.flowseal.tgwsproxy.byedpi.ui.ByeDpiSettingsActivity
 import com.flowseal.tgwsproxy.service.ProxyForegroundService
 import com.flowseal.tgwsproxy.ui.AppViewModel
 import com.flowseal.tgwsproxy.ui.MainScreen
@@ -53,10 +55,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val vpnPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            ServiceManager.startVpn(this)
+        } else {
+            Toast.makeText(this, getString(R.string.vpn_permission_denied), Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         maybeRequestNotificationPermission()
 
         setContent {
@@ -66,13 +76,21 @@ class MainActivity : ComponentActivity() {
                     val state by vm.state.collectAsState()
                     MainScreen(
                         state = state,
-                        onStart = {
+                        onStartProxy = {
                             ProxyForegroundService.start(this)
                             vm.refresh()
                         },
-                        onStop = {
+                        onStopProxy = {
                             ProxyForegroundService.stop(this)
                             vm.refresh()
+                        },
+                        onStartVpn = { requestVpnAndStart(vm) },
+                        onStopVpn = {
+                            ServiceManager.stopVpn(this)
+                            vm.refresh()
+                        },
+                        onOpenByeDpiSettings = {
+                            startActivity(Intent(this, ByeDpiSettingsActivity::class.java))
                         },
                         onCopyLink = {
                             vm.copyLink(this)
@@ -109,11 +127,21 @@ class MainActivity : ComponentActivity() {
                         },
                         onRefreshComponents = {
                             vm.refreshComponentsNow()
-                            Toast.makeText(this, "Refreshing CF domains…", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Updating CF domain list…", Toast.LENGTH_SHORT).show()
                         },
                     )
                 }
             }
+        }
+    }
+
+    private fun requestVpnAndStart(vm: AppViewModel) {
+        val prepare = VpnService.prepare(this)
+        if (prepare != null) {
+            vpnPermissionLauncher.launch(prepare)
+        } else {
+            ServiceManager.startVpn(this)
+            vm.refresh()
         }
     }
 

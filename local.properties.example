@@ -1,2 +1,4 @@
-# Local SDK path example (do not commit real local.properties)
-sdk.dir=/path/to/Android/Sdk
+## This file must NOT be committed. Copy to local.properties and set your SDK path.
+sdk.dir=/home/YOU/Android/Sdk
+## NDK and CMake 3.22.1+ are required (sdkmanager: "ndk;27.0.12077973" "cmake;3.22.1")
+## Signing / CI secrets: see docs/AndroidSigning.md

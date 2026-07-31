@@ -10,6 +10,14 @@ We are **not** affiliated with Flowseal. Please support the original project if 
 
 CF proxy domain lists may still be fetched from the upstream repository’s public raw files.
 
+## ByeDPI
+
+Optional VPN / DPI bypass integrates code and patterns from:
+
+- **[ByeDPIAndroid](https://github.com/dovecoteescapee/ByeDPIAndroid)** (GPL-3.0)
+- **[byedpi](https://github.com/hufrea/byedpi)** (MIT)
+- **[hev-socks5-tunnel](https://github.com/heiher/hev-socks5-tunnel)** (MIT)
+
 ## This repository
 
 - **Android (Kotlin / Compose) port, packaging, CI, Obtainium docs:** [MushroomSquad](https://github.com/MushroomSquad)

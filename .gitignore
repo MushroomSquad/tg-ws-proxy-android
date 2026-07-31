@@ -7,6 +7,9 @@ local.properties
 *.aab
 *.ap_
 *.dex
+app/.cxx/
+app/src/main/jniLibs/
+.omc/
 
 # IDE
 .idea/

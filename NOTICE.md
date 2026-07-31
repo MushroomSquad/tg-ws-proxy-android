@@ -1,23 +1,35 @@
-# Vibe-coded / Собран с LLM
+# TgWsProxy Android — notices
 
-## English
+This Android app was largely vibe-coded with LLM assistants. Review critically before relying on it.
 
-Large parts of this Android port were written and iterated with **LLM coding assistants** (vibe-coding). That means:
+## Upstream desktop protocol
 
-- Features may be incomplete or wrong for your network.
-- Always treat releases as **community / best-effort**.
-- Prefer reading the Kotlin sources and CI logs over blind trust.
-- Bug reports with exported logs help more than “it doesn’t work”.
+- Project: https://github.com/Flowseal/tg-ws-proxy
+- License: MIT
+- Used for: MTProto ↔ WebSocket proxy logic (ported to Kotlin)
 
-Human maintainers still ship tags and review CI, but there was no traditional long design/review cycle for every line.
+## ByeDPIAndroid
 
-## Русский
+- Project: https://github.com/dovecoteescapee/ByeDPIAndroid
+- License: GNU General Public License v3.0
+- Used for: VPN service glue, preference screens, JNI bindings patterns
 
-Значительная часть Android-порта сделана и отлажена с помощью **LLM-ассистентов** (вайбкодинг).
+Because GPL-3.0 ByeDPIAndroid code is included, this combined Android application
+(`com.flowseal.tgwsproxy`) is distributed under GPL-3.0. See `LICENSE`.
 
-- Функции могут быть неполными или неверными для вашей сети.
-- Релизы — **best-effort**, не «enterprise QA».
-- Смотрите исходники и логи CI, не ставьте вслепую.
-- Багрепорты с экспортом логов полезнее фразы «не работает».
+## byedpi
 
-Теги и CI ведут люди, но это не классический долгий ревью-цикл по каждой строке.
+- Project: https://github.com/hufrea/byedpi
+- License: MIT
+- Path: `app/src/main/cpp/byedpi/`
+
+## hev-socks5-tunnel
+
+- Project: https://github.com/heiher/hev-socks5-tunnel
+- License: MIT
+- Path: `app/src/main/jni/hev-socks5-tunnel/`
+
+## Docs
+
+- `docs/README.android.md`
+- `docs/AndroidSigning.md` (keystore + GitHub Actions secrets)

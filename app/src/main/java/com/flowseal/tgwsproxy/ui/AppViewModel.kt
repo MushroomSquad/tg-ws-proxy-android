@@ -10,6 +10,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.flowseal.tgwsproxy.byedpi.services.byeDpiRunning
 import com.flowseal.tgwsproxy.data.ConfigRepository
 import com.flowseal.tgwsproxy.proxy.ProxyConfig
 import com.flowseal.tgwsproxy.service.ProxyForegroundService
@@ -26,7 +27,8 @@ import kotlinx.coroutines.launch
 
 data class UiState(
     val config: ProxyConfig = ProxyConfig(),
-    val running: Boolean = false,
+    val proxyRunning: Boolean = false,
+    val vpnRunning: Boolean = false,
     val logTail: String = "",
     val firstRun: Boolean = true,
     val updateInfo: UpdateInfo? = null,
@@ -40,21 +42,24 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val updateInfo = MutableStateFlow<UpdateInfo?>(null)
     private val componentStatus = MutableStateFlow<String?>(null)
 
+    private data class Extra(val refresh: Int, val update: UpdateInfo?, val component: String?)
+    private data class ServiceFlags(val proxy: Boolean, val vpn: Boolean)
+
     val state: StateFlow<UiState> = combine(
         repo.configFlow,
-        ProxyForegroundService.running,
+        combine(ProxyForegroundService.running, byeDpiRunning) { p, v -> ServiceFlags(p, v) },
         AppLog.tail,
         repo.firstRunDoneFlow,
-        combine(refresh, updateInfo, componentStatus) { r, u, c -> Triple(r, u, c) },
-    ) { config, running, logs, firstDone, extra ->
-        val (_, upd, comp) = extra
+        combine(refresh, updateInfo, componentStatus) { r, u, c -> Extra(r, u, c) },
+    ) { config, services, logs, firstDone, extra ->
         UiState(
             config = if (config.secret.isEmpty()) config.copy(secret = "…") else config,
-            running = running || ProxyForegroundService.isRunning(),
+            proxyRunning = services.proxy || ProxyForegroundService.isRunning(),
+            vpnRunning = services.vpn,
             logTail = logs,
             firstRun = !firstDone,
-            updateInfo = upd,
-            componentStatus = comp,
+            updateInfo = extra.update,
+            componentStatus = extra.component,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UiState())
 
@@ -65,7 +70,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             }
             val cfg = repo.ensureSecret()
             refresh.value++
-            // Refresh CF components on launch; APK dialog only if real .apk exists
             val result = ComponentUpdater.refreshCfDomains(getApplication())
             componentStatus.value = result.message
             ProxyForegroundService.refreshComponents()
@@ -79,10 +83,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         refresh.value++
     }
 
-    /** Pull CF domain list (updatable components). Not the upstream desktop Releases page. */
     fun refreshComponentsNow() {
         viewModelScope.launch {
-            componentStatus.value = "Refreshing CF domains…"
+            componentStatus.value = "Updating Cloudflare domain list…"
             val result = ComponentUpdater.refreshCfDomains(getApplication())
             componentStatus.value = result.message
             ProxyForegroundService.refreshComponents()
@@ -119,7 +122,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         AppLog.clear()
     }
 
-    /** Share log snapshot via system share sheet. */
     fun shareLogs(context: Context): Boolean {
         val file = AppLog.snapshotForExport(context) ?: return false
         return try {

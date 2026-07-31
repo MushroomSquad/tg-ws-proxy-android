@@ -2,12 +2,12 @@
 
 [![Release](https://img.shields.io/github/v/release/MushroomSquad/tg-ws-proxy-android?include_prereleases)](https://github.com/MushroomSquad/tg-ws-proxy-android/releases/latest)
 [![APK](https://img.shields.io/badge/download-APK-blue)](https://github.com/MushroomSquad/tg-ws-proxy-android/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![Obtainium](https://img.shields.io/badge/updates-Obtainium-green)](https://github.com/ImranR98/Obtainium)
 
-**Ключевые слова:** прокси Telegram Android · MTProto · WebSocket · локальный прокси · без root · без VPN · APK · Obtainium · Kotlin Compose
+**Ключевые слова:** прокси Telegram Android · MTProto · WebSocket · локальный прокси · ByeDPI · VPN · APK · Obtainium · Kotlin Compose
 
-Локальный **MTProto ↔ WebSocket** прокси для **Telegram Android** — без root и без VPN.
+Локальный **MTProto ↔ WebSocket** прокси для **Telegram Android**, плюс опциональный системный VPN **ByeDPI**. Прокси и VPN включаются отдельно.
 
 Telegram ходит на `127.0.0.1` на телефоне; приложение мостит к DC Telegram по WSS/TCP (та же идея, что у desktop [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)).
 
@@ -67,7 +67,8 @@ Xiaomi, Huawei, Samsung и др. могут убивать сервис.
 ## Подсказки по настройкам
 
 - **DC IP**: по умолчанию DC2+DC4 → `149.154.167.220`. Если на non-Premium плохо грузятся фото/файлы — оставьте только `4:149.154.167.220` или очистите поле (см. доки upstream).
-- **Refresh CF**: обновляет список CF-доменов.
+- **Update domain list**: обновляет список CF-доменов.
+- **Настройки ByeDPI**: полный экран параметров ByeDPI.
 - **Save logs / Share logs**: для багрепортов.
 
 ## Сборка из исходников
@@ -90,4 +91,4 @@ CI собирает подписанные APK по тегам `v*` через G
 
 ## Лицензия
 
-[MIT](LICENSE) — © Flowseal (upstream) и MushroomSquad (Android-порт).
+[GPL-3.0](LICENSE) для этого приложения (код на базе ByeDPIAndroid). Upstream desktop-протокол: MIT ([Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)). См. [NOTICE.md](NOTICE.md) и [CREDITS.md](CREDITS.md).

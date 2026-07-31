@@ -1,18 +1,19 @@
-# TgWsProxy Android — Telegram MTProto WebSocket Proxy (no root)
+# TgWsProxy Android — Telegram MTProto WebSocket Proxy + optional ByeDPI VPN
 
 [![Release](https://img.shields.io/github/v/release/MushroomSquad/tg-ws-proxy-android?include_prereleases)](https://github.com/MushroomSquad/tg-ws-proxy-android/releases/latest)
 [![APK](https://img.shields.io/badge/download-APK-blue)](https://github.com/MushroomSquad/tg-ws-proxy-android/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 [![Obtainium](https://img.shields.io/badge/updates-Obtainium-green)](https://github.com/ImranR98/Obtainium)
 
-**Keywords:** Telegram Android proxy · MTProto · WebSocket · local proxy · no root · no VPN · Obtainium APK · Kotlin Compose
+**Keywords:** Telegram Android proxy · MTProto · WebSocket · local proxy · ByeDPI · VPN · Obtainium APK · Kotlin Compose
 
-Local **MTProto ↔ WebSocket** proxy for **Telegram Android** — no root, no VPN.
+Local **MTProto ↔ WebSocket** proxy for **Telegram Android**, plus an optional **ByeDPI** system VPN. Proxy and VPN start/stop independently.
 
 Telegram talks to `127.0.0.1` on your phone; this app bridges to Telegram DCs over WSS/TCP (same idea as the desktop [Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)).
 
 ```text
 Telegram Android → 127.0.0.1:1443 → TgWsProxy → WSS/TCP → Telegram DC
+Optional: ByeDPI VpnService for DPI bypass on device traffic
 ```
 
 **Русская версия:** [README.ru.md](README.ru.md)
@@ -49,10 +50,11 @@ Obtainium will pick new APKs from GitHub Releases automatically.
 
 ## Connect Telegram
 
-1. Open **TgWsProxy** → **Start** (keep the notification).
-2. **Open Telegram** or **Copy link**.
-3. In Telegram: **Settings → Data and Storage → Proxy** — enable the proxy.
-4. Manual MTProto:
+1. Open **TgWsProxy** → start the **Telegram proxy** (keep the notification).
+2. Optionally start **ByeDPI VPN** (system VPN permission) and open ByeDPI settings from the app.
+3. **Open Telegram** or **Copy link**.
+4. In Telegram: **Settings → Data and Storage → Proxy** — enable the proxy.
+5. Manual MTProto:
    - Server: `127.0.0.1`
    - Port: `1443` (or your setting)
    - Secret: from the app (`dd` + 32 hex)
@@ -67,18 +69,19 @@ Xiaomi, Huawei, Samsung, etc. may kill the foreground service.
 ## Settings tips
 
 - **DC IP**: default maps DC2+DC4 to `149.154.167.220` (fronting). If photos/files fail on non-Premium, try only `4:149.154.167.220` or clear the field (see upstream docs).
-- **Refresh CF**: refreshes Cloudflare proxy domain list (may still use upstream raw lists).
+- **Update domain list**: refreshes Cloudflare proxy domain list.
+- **ByeDPI settings**: full ByeDPI preference screens (desync, hosts, etc.).
 - **Save logs / Share logs**: for bug reports.
 
 ## Build from source
 
-Needs JDK 17 and Android SDK (API 35).
+Needs JDK 17, Android SDK (API 35), NDK, and CMake.
 
 ```bash
 export JAVA_HOME=/path/to/jdk-17
 export ANDROID_HOME=/path/to/Android/Sdk
 
-# Optional local signing (or use env vars — see CI)
+# Optional local signing — see docs/AndroidSigning.md
 # place keystore/tgwsproxy.jks and set:
 # KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD
 
@@ -90,8 +93,8 @@ CI builds signed APKs on version tags (`v*`) via GitHub Actions.
 
 ## Related searches
 
-telegram proxy android · mtproto websocket · tg ws proxy · local mtproto proxy · obtainium telegram · android no root proxy
+telegram proxy android · mtproto websocket · tg ws proxy · byedpi android · local mtproto proxy · obtainium telegram
 
 ## License
 
-[MIT](LICENSE) — © Flowseal (upstream) and MushroomSquad (Android port).
+[GPL-3.0](LICENSE) for this app (includes ByeDPIAndroid-derived code). Upstream desktop protocol: MIT ([Flowseal/tg-ws-proxy](https://github.com/Flowseal/tg-ws-proxy)). See [NOTICE.md](NOTICE.md) and [CREDITS.md](CREDITS.md).
