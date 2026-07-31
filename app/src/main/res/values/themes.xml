@@ -3,7 +3,7 @@
     <style name="Theme.TgWsProxy" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowBackground">#FF0F172A</item>
+        <item name="android:windowBackground">#FF0E0E11</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
@@ -11,7 +11,7 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowBackground">#FF0F172A</item>
+        <item name="android:windowBackground">#FF0E0E11</item>
         <item name="colorPrimary">#FF38BDF8</item>
         <item name="colorOnPrimary">#FF0F172A</item>
         <item name="android:textColorPrimary">#FFE2E8F0</item>

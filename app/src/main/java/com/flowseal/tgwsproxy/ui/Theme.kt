@@ -1,38 +1,36 @@
 package com.flowseal.tgwsproxy.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFF38BDF8),
-    onPrimary = Color(0xFF0F172A),
-    secondary = Color(0xFF94A3B8),
-    background = Color(0xFF0F172A),
-    surface = Color(0xFF1E293B),
-    onBackground = Color(0xFFF1F5F9),
-    onSurface = Color(0xFFF1F5F9),
-    error = Color(0xFFF87171),
-)
-
-private val LightColors = lightColorScheme(
-    primary = Color(0xFF0284C7),
-    onPrimary = Color.White,
-    secondary = Color(0xFF475569),
-    background = Color(0xFFF8FAFC),
-    surface = Color.White,
-    onBackground = Color(0xFF0F172A),
-    onSurface = Color(0xFF0F172A),
+private val AmneziaDark = darkColorScheme(
+    primary = AmneziaColors.Accent,
+    onPrimary = AmneziaColors.ButtonOn,
+    secondary = AmneziaColors.Muted,
+    background = AmneziaColors.Bg,
+    surface = AmneziaColors.Surface,
+    onBackground = AmneziaColors.Text,
+    onSurface = AmneziaColors.Text,
+    error = AmneziaColors.Error,
+    outline = AmneziaColors.Border,
 )
 
 @Composable
 fun TgWsTheme(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
     MaterialTheme(
-        colorScheme = if (dark) DarkColors else LightColors,
+        colorScheme = AmneziaDark,
+        typography = Typography(
+            headlineLarge = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold, color = AmneziaColors.Text),
+            headlineMedium = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold, color = AmneziaColors.Text),
+            bodyLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal, color = AmneziaColors.Text),
+            labelMedium = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal, color = AmneziaColors.Muted),
+            labelLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = AmneziaColors.Text),
+        ),
         content = content,
     )
 }
