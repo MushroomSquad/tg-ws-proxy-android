@@ -1,7 +1,7 @@
 # Client Router — product design (casual UX + hierarchical weights)
 
 Date: 2026-07-31  
-Status: draft for user review  
+Status: approved  
 Repo: [MushroomSquad/tg-ws-proxy-android](https://github.com/MushroomSquad/tg-ws-proxy-android)
 
 ## Goal
