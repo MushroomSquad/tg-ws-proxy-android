@@ -2,6 +2,7 @@ package com.flowseal.tgwsproxy.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +26,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.flowseal.tgwsproxy.proxy.ProxyServer
@@ -91,7 +97,7 @@ fun HomeTab(
             Spacer(modifier = Modifier.weight(1f))
             ServicesPeek(
                 status = ConnectPlanner.statusLine(snap),
-                onClick = { onDrawerExpandedChange(true) },
+                onOpen = { onDrawerExpandedChange(true) },
             )
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -123,21 +129,39 @@ fun HomeTab(
 @Composable
 private fun ServicesPeek(
     status: String,
-    onClick: () -> Unit,
+    onOpen: () -> Unit,
 ) {
+    var dragAccum by remember { mutableFloatStateOf(0f) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(AmneziaColors.Surface, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-            .clickable(onClick = onClick)
+            .pointerInput(Unit) {
+                detectVerticalDragGestures(
+                    onDragEnd = {
+                        if (dragAccum < -48f) onOpen()
+                        dragAccum = 0f
+                    },
+                    onDragCancel = { dragAccum = 0f },
+                    onVerticalDrag = { change, dragAmount ->
+                        change.consume()
+                        dragAccum += dragAmount
+                        if (dragAccum < -96f) {
+                            onOpen()
+                            dragAccum = 0f
+                        }
+                    },
+                )
+            }
+            .clickable(onClick = onOpen)
             .padding(horizontal = 24.dp, vertical = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
             modifier = Modifier
-                .width(20.dp)
-                .height(2.dp)
-                .background(AmneziaColors.Border, RoundedCornerShape(1.dp)),
+                .width(36.dp)
+                .height(4.dp)
+                .background(AmneziaColors.Muted.copy(alpha = 0.5f), RoundedCornerShape(2.dp)),
         )
         Spacer(modifier = Modifier.height(14.dp))
         Text(
@@ -150,6 +174,12 @@ private fun ServicesPeek(
             text = status,
             style = MaterialTheme.typography.labelMedium,
             color = AmneziaColors.Muted,
+        )
+        Text(
+            text = "Swipe up or tap",
+            style = MaterialTheme.typography.labelMedium,
+            color = AmneziaColors.Muted.copy(alpha = 0.7f),
+            modifier = Modifier.padding(top = 4.dp),
         )
     }
 }

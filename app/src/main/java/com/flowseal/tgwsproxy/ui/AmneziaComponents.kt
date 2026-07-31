@@ -42,6 +42,7 @@ fun AmneziaCard(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             content = content,
         )
     }
@@ -68,7 +69,11 @@ fun AmneziaPrimaryButton(
             disabledContentColor = AmneziaColors.Muted,
         ),
     ) {
-        Text(text, style = MaterialTheme.typography.labelLarge)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = AmneziaColors.ButtonOn,
+        )
     }
 }
 

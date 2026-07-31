@@ -25,11 +25,11 @@ fun TgWsTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = AmneziaDark,
         typography = Typography(
-            headlineLarge = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold, color = AmneziaColors.Text),
-            headlineMedium = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold, color = AmneziaColors.Text),
-            bodyLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal, color = AmneziaColors.Text),
-            labelMedium = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal, color = AmneziaColors.Muted),
-            labelLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = AmneziaColors.Text),
+            headlineLarge = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
+            headlineMedium = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold),
+            bodyLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal),
+            labelMedium = TextStyle(fontSize = 13.sp, fontWeight = FontWeight.Normal),
+            labelLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
         ),
         content = content,
     )

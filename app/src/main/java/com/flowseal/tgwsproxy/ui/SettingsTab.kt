@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -66,7 +67,6 @@ fun SettingsTab(
 
         AmneziaCard {
             Text("Cloudflare", fontWeight = FontWeight.SemiBold, color = AmneziaColors.Text)
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "If a Telegram DC is blocked, the proxy can tunnel via Cloudflare domains. " +
                     "Update when media/proxy fails or the list is stale.",
@@ -145,9 +145,11 @@ private fun ProxySettingsCard(
         unfocusedTextColor = AmneziaColors.Text,
         focusedBorderColor = AmneziaColors.Accent,
         unfocusedBorderColor = AmneziaColors.Border,
-        focusedLabelColor = AmneziaColors.Muted,
-        unfocusedLabelColor = AmneziaColors.Muted,
         cursorColor = AmneziaColors.Accent,
+        focusedContainerColor = AmneziaColors.Bg,
+        unfocusedContainerColor = AmneziaColors.Bg,
+        focusedPlaceholderColor = AmneziaColors.Muted,
+        unfocusedPlaceholderColor = AmneziaColors.Muted,
     )
 
     AmneziaCard {
@@ -157,54 +159,48 @@ private fun ProxySettingsCard(
             style = MaterialTheme.typography.labelMedium,
             color = AmneziaColors.Muted,
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
+        SettingsField(
+            caption = "Port",
             value = port,
             onValueChange = { port = it },
-            label = { Text("Port") },
             singleLine = true,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedTextField(
+        SettingsField(
+            caption = "Secret (32 hex)",
             value = secret,
             onValueChange = {
                 secret = it.filter { c -> c.isDigit() || c in 'a'..'f' || c in 'A'..'F' }.take(32)
             },
-            label = { Text("Secret (32 hex)") },
             singleLine = true,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedTextField(
+        SettingsField(
+            caption = "DC IP (DC:IP per line)",
             value = dcIp,
             onValueChange = { dcIp = it },
-            label = { Text("DC IP (DC:IP per line)") },
+            singleLine = false,
             minLines = 2,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedTextField(
+        SettingsField(
+            caption = "Own CF Worker domains",
             value = workers,
             onValueChange = { workers = it },
-            label = { Text("Own CF Worker domains") },
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedTextField(
+        SettingsField(
+            caption = "Own CF proxy domains",
             value = userDomains,
             onValueChange = { userDomains = it },
-            label = { Text("Own CF proxy domains") },
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth(),
         )
-        OutlinedTextField(
+        SettingsField(
+            caption = "WS pool size",
             value = pool,
             onValueChange = { pool = it },
-            label = { Text("WS pool size") },
             singleLine = true,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth(),
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Cloudflare fallback", color = AmneziaColors.Text, modifier = Modifier.weight(1f))
@@ -219,7 +215,6 @@ private fun ProxySettingsCard(
             AmneziaSwitch(checked = checkUpdates, onCheckedChange = { checkUpdates = it })
         }
         error?.let { Text(it, color = AmneziaColors.Error) }
-        Spacer(modifier = Modifier.height(8.dp))
         AmneziaPrimaryButton(
             text = "Save",
             onClick = {
@@ -248,6 +243,33 @@ private fun ProxySettingsCard(
                     error = e.message ?: "Invalid settings"
                 }
             },
+        )
+    }
+}
+
+@Composable
+private fun SettingsField(
+    caption: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    colors: androidx.compose.material3.TextFieldColors,
+    singleLine: Boolean = false,
+    minLines: Int = 1,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = caption,
+            style = MaterialTheme.typography.labelMedium,
+            color = AmneziaColors.Muted,
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = singleLine,
+            minLines = minLines,
+            colors = colors,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
